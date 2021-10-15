@@ -1,26 +1,30 @@
 import dynamoDb from "../../libs/dynamodb-lib";
+import reviewService from '../reviews/reviewService';
 
 export default {
   getProduct: (productId, fetchReviews) => {
     return new Promise(async (resolve, reject) => {
       const getProductParams = {
-            TableName: process.env.tableName,
-            KeyConditionExpression:
-              'productId = :productId',
-            ExpressionAttributeValues: {
-              ':productId': productId,
-            },
+          TableName: process.env.productTable,
+            Key: {
+              productId: productId
+            }
           };
       try{
-        const productDetails = await dynamoDb.query(getProductParams);
-        if(!fetchReviews){
-          resolve(productDetails.Item || {});
+        const getProductResult = await dynamoDb.get(getProductParams);
+        const productDetails = getProductResult.Item || {};
+        if(fetchReviews !== "true"){
+          resolve(productDetails);
         }else{
-          // fetch product reviews using review service
+          const productReviews = await reviewService.getProductReviews(productId);
+          resolve({
+            ...productDetails,
+            reviews: productReviews
+          });
         }
       }catch(error){
           reject(error);
       }
     });
   }
-}
+};

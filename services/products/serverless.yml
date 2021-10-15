@@ -6,8 +6,6 @@ package:
 
 plugins:
   - serverless-bundle # Package our functions with Webpack
-  - serverless-offline
-  - serverless-domain-manager
 
 custom:
   stage: ${self:provider.stage}
@@ -24,6 +22,7 @@ provider:
   versionFunctions: false
   environment:
     productTable: ${self:provider.stage}-products
+    reviewTable: ${self:provider.stage}-reviews
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
@@ -38,7 +37,16 @@ provider:
       - dynamodb:PutItem
       - dynamodb:UpdateItem
       - dynamodb:DeleteItem
-    Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.tableName}
+    Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.productTable}
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:UpdateItem
+      - dynamodb:DeleteItem
+    Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.reviewTable}
 
 functions:
   getAllProducts:
@@ -56,20 +64,4 @@ functions:
       - http:
           path: 'product/{productId}'
           method: get
-          cors: true
-  getProductReviews:
-    handler: productController.getProductReviews
-    memorySize : 256
-    events:
-      - http:
-          path: 'product/{productId}/reviews'
-          method: get
-          cors: true
-  addProductReview:
-    handler: productController.addProductReview
-    memorySize : 256
-    events:
-      - http:
-          path: ''
-          method: post
           cors: true
