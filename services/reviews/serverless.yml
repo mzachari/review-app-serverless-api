@@ -44,7 +44,7 @@ functions:
     memorySize : 256
     events:
       - http:
-          path: 'product/{productId}/reviews'
+          path: 'reviews/{productId}'
           method: get
           cors: true
   addProductReview:
@@ -52,6 +52,6 @@ functions:
     memorySize : 256
     events:
       - http:
-          path: ''
+          path: 'reviews/{productId}'
           method: post
           cors: true
