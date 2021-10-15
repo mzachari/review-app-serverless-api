@@ -26,5 +26,19 @@ export default {
           reject(error);
       }
     });
+  },
+  getAllProducts: () => {
+    return new Promise(async (resolve, reject) => {
+      const getAllProductsParams = {
+          TableName: process.env.productTable
+          };
+      try{
+        const getAllProductsResult = await dynamoDb.scan(getAllProductsParams);
+        const allProducts = getAllProductsResult.Items || [];
+        resolve(allProducts);
+      }catch(error){
+          reject(error);
+      }
+    });
   }
 };
