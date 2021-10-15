@@ -1,4 +1,4 @@
-service: review-app-mvp-api
+service: review-app-mvp-api-reviews
 
 # Create an optimized package for our functions
 package:
@@ -42,7 +42,7 @@ provider:
 
 functions:
   getProductReviews:
-    handler: controller.getProductReviews
+    handler: reviewController.getProductReviews
     memorySize : 256
     events:
       - http:
@@ -50,7 +50,7 @@ functions:
           method: get
           cors: true
   addProductReview:
-    handler: controller.addProductReview
+    handler: reviewController.addProductReview
     memorySize : 256
     events:
       - http:
