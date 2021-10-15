@@ -1,0 +1,59 @@
+service: review-app-mvp-api
+
+# Create an optimized package for our functions
+package:
+  individually: true
+
+plugins:
+  - serverless-bundle # Package our functions with Webpack
+  - serverless-offline
+  - serverless-domain-manager
+
+custom:
+  stage: ${self:provider.stage}
+  awsAccountId:
+    stage: '075597226000'
+    dev:   '075597226000'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region,'ap-south-1'}
+  profile: ${opt:profile, 'staginghta'}
+  versionFunctions: false
+  environment:
+    reviewTable: ${self:provider.stage}-reviews
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+  apiGateway:
+    minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
+    
+
+  iamRoleStatements:
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:UpdateItem
+      - dynamodb:DeleteItem
+    Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.reviewTable}
+
+functions:
+  getProductReviews:
+    handler: controller.getProductReviews
+    memorySize : 256
+    events:
+      - http:
+          path: 'product/{productId}/reviews'
+          method: get
+          cors: true
+  addProductReview:
+    handler: controller.addProductReview
+    memorySize : 256
+    events:
+      - http:
+          path: ''
+          method: post
+          cors: true
