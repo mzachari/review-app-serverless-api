@@ -62,6 +62,6 @@ functions:
     memorySize : 256
     events:
       - http:
-          path: 'product/{productId}'
+          path: 'products/{productId}'
           method: get
           cors: true
