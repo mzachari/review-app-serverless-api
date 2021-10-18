@@ -22,6 +22,8 @@ provider:
   versionFunctions: false
   environment:
     reviewTable: ${self:provider.stage}-reviews
+    connectionTable: ${self:provider.stage}-connection
+    WEBSOCKET_API_ENDPOINT: !Join ['', ['https://', !Ref WebsocketsApi, '.execute-api.', '${opt:region, self:provider.region}', '.amazonaws.com/', '${opt:stage, self:provider.stage}/']]
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
   apiGateway:
     minimumCompressionSize: 1024 # Enable gzip compression for responses > 1 KB
@@ -37,7 +39,15 @@ provider:
       - dynamodb:UpdateItem
       - dynamodb:DeleteItem
     Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.reviewTable}
-
+  - Effect: Allow
+    Action:
+      - dynamodb:Query
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:UpdateItem
+      - dynamodb:DeleteItem
+    Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.connectionTable}
 functions:
   getProductReviews:
     handler: reviewController.getProductReviews
@@ -55,3 +65,19 @@ functions:
           path: 'reviews/{productId}'
           method: post
           cors: true
+  defaultSocketHandler:
+    handler: reviewController.defaultSocketHandler
+    memorySize: 512
+    events:
+      - websocket:
+          route: $default
+  handleSocketConnect:
+    handler: reviewController.handleSocketConnect
+    events:
+      - websocket:
+          route: $connect
+  handleSocketDisconnect:
+    handler: reviewController.handleSocketDisconnect
+    events:
+      - websocket:
+          route: $disconnect
