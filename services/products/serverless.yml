@@ -46,6 +46,11 @@ provider:
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
       Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.reviewTable}
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource: arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId.${self:custom.stage}}:table/${self:provider.environment.reviewTable}/index/*
 functions:
   getAllProducts:
     handler: productController.getAllProducts

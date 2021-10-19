@@ -6,10 +6,12 @@ export default {
     return new Promise(async (resolve, reject) => {
       const getProductReviewsParams = {
         TableName: process.env.reviewTable,
+        IndexName: "lastUpdatedTimeIndex",
         KeyConditionExpression: "productId = :productId",
         ExpressionAttributeValues: {
           ":productId": productId,
         },
+        ScanIndexForward: false,
       };
       try {
         const getProductReviewsResult = await dynamoDb.query(
@@ -31,6 +33,7 @@ export default {
           reviewId: uuid.v4(),
           reviewText: reviewText,
           rating: rating,
+          lastUpdatedTime: new Date().toISOString(),
         },
       };
       try {
